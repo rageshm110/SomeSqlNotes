@@ -1,0 +1,7 @@
+First, check the session number with qwinsta:
+	QWINSTA /server:CO1CSORCIS01.redmond.corp.microsoft.com
+	capstaging.partners.extranet.microsoft.com
+	Write down the session ID. 
+	Then use the logoff command:
+	LOGOFF sessionID /server:CO1CSORCIS01.redmond.corp.microsoft.com
+From <http://superuser.com/questions/650816/log-off-a-disconnected-user-remotely> 
