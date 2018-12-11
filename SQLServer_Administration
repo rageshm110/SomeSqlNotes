@@ -1,0 +1,75 @@
+-- See max number of threads configured
+SELECT * FROM sys.configurations
+WHERE Name = 'max worker threads'
+GO
+
+-- Link with information on the max worked thread configurations
+-- https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/configure-the-max-worker-threads-server-configuration-option
+
+-- Configure MAX WORKER THREAD
+EXEC sp_configure 'show advanced options', 1
+GO
+RECONFIGURE;
+GO
+-- changing the value of max worker thread to 128
+EXEC sp_configure 'max worker thread', 128
+GO
+RECONFIGURE;
+GO
+
+EXEC sp_configure 'show advanced options', 0
+GO
+RECONFIGURE;
+GO
+
+
+/*
+Themax worker threads server configuration option does not take into account threads that are required for all the system tasks such as Availibility Groups,
+Service Broker, Lock Manager, and others. If the number of threads configured are being exceeded, the following query will provide information about the system
+tasks that have spawned the additional threads.
+*/
+SELECT  
+	s.session_id,
+	s.login_name,
+	s.host_name,
+	DB_NAME(s.database_id) AS [database],
+	r.command,  
+	r.status,  
+	r.wait_type,  
+	r.scheduler_id,  
+	w.worker_address,  
+	w.is_preemptive,  
+	w.state,  
+	t.task_state,  
+	--t.session_id,  
+	t.exec_context_id,  
+	t.request_id  
+FROM sys.dm_exec_sessions AS s  
+INNER JOIN sys.dm_exec_requests AS r  
+    ON s.session_id = r.session_id  
+INNER JOIN sys.dm_os_tasks AS t  
+    ON r.task_address = t.task_address  
+INNER JOIN sys.dm_os_workers AS w  
+    ON t.worker_address = w.worker_address  
+WHERE s.is_user_process = 0 -- 0 for system tasks and 1 for user tasks
+ORDER BY s.session_id;
+GO
+
+
+-- To figure out if a new thread is available for new requests, CHECK WORK QUEUE COUNT
+SELECT
+	oss.scheduler_address,
+	oss.status,
+	oss.current_tasks_count,
+	oss.runnable_tasks_count,
+	oss.current_workers_count,
+	oss.active_workers_count,
+	oss.work_queue_count,
+	oss.load_factor,
+	oss.failed_to_create_worker
+FROM sys.dm_os_schedulers AS oss;
+GO
+
+
+SELECT * FROM sys.databases;
+GO
