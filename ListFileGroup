@@ -1,0 +1,10 @@
+SELECT DB_NAME(database_id) AS DatabaseName,
+f.[Name] AS Logical_Name,
+g.[name] AS FG_Name,
+Physical_Name, (size*8)/1024 SizeMB
+FROM sys.master_files as f
+LEFT JOIN sys.filegroups as g
+ON f.data_space_id = g.data_space_id
+WHERE DB_NAME(database_id) = '' AND g.[Name] = 'FG_06'
+ORDER BY f.[Name]
+GO
