@@ -1,0 +1,7 @@
+Some common exception handling steps.
+	■ Engage Services SQL Operations team for additional troubleshooting.
+	■ Review top 10 CPU consuming queries and their execution plans.
+	■ Review server CPU capacity.
+	■ Review transaction volume for spikes.
+	■ Review data volume for spikes.   
+Review database statistics
