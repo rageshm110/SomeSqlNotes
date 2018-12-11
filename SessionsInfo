@@ -1,0 +1,11 @@
+SELECT DISTINCT r.session_id spid,
+                              r.blocking_session_id blkby, s.host_name, SUBSTRING(t.text, 1, 1000) SQLText, 
+                       ( SELECT TOP 1 SUBSTRING(t.text,stmt_start / 2, ( (CASE WHEN stmt_end = -1 THEN (LEN(CONVERT(nvarchar(max),t.text)) * 2) ELSE stmt_end END)  - stmt_start) / 2)  )  AS Text,
+                              r.Command, r.wait_time, r.wait_type, r.cpu_time, r.total_elapsed_time, 
+                              s.program_name, r.Status, s.Login_name
+   FROM master.dbo.sysprocesses P with (nolock) INNER JOIN sys.dm_exec_requests r(Nolock)
+                              ON p.SPId = r.Session_Id
+                              INNER JOIN sys.dm_exec_sessions s (Nolock)
+                              ON r.session_id = s.session_id
+                              CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) t
+                        WHERE s.is_user_process = 1
