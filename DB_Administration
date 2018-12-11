@@ -1,0 +1,86 @@
+installation decisions:
+	Determine appropriate hardware
+		> Virtualization VS hard
+
+	CPU Sockets and Cores
+	Memory
+	DAS vs SAN
+	Consider Solid State Storage
+	Free, unsupported workloads SQLIO, SQLIOSIM
+
+Select Appropriate Windows Operating System
+	SQL Server is supported on windows server core
+
+Editions
+	Principle Editions
+		Enterprise
+		Buisness Intelligence
+		Standard
+		Evaluation
+
+	Specialized Editions
+		Web
+
+	Breadth Editions
+		Express
+		Developer - Enterprise edition class features, no production connection
+
+
+Default Instance/Named Instance
+Each instances will have it's own set of services and service settings
+Every single edition of sql server supports upto 50 instances
+
+Collation
+	Collation is a rule book of text based sorting and comparision rules.
+
+		Collation can be set up at Database Leve and per column basis.
+
+Design the storage for new databses
+------------------------------------
+	Drive Layout: Design Windows File Syatem for Expected I/O patterns.
+	Consider Multiple file groups and Multiple Data File Designs.
+	Table Partitioning Design.
+
+	[We need to separate log file and data file activities]
+
+	[Table and Indexes can be designated to a particular filegroup but not to a prticular file]
+
+	Table Partitioning
+		Table partitioning spreads data of a single table over multiple filegroups.
+			purpose
+				use more read/write heads to separate I/O activity over separate partition.
+				efficiently load new dat into a large table.
+				perform index maintenance on aprtition by partition basis.
+
+Planning for GROWTH and CAPACITY
+--------------------------------
+	
+	Growth Monitoring
+		-Code and Agent Jobs
+		- Performance Object Alert
+		- Management Data Warehouse
+		- Catalog Views and DMVs
+			sys.database_files
+			sys.dm_os_volume_stats
+				SELECT db_name(f.database_id), f.file_id, volume_mount_point, (total_bytes/1073741824) AS TotalSizeGB, (available_bytes/1073741824) AS AvailableSizeGB
+				FROM sys.master_files AS f  
+				CROSS APPLY sys.dm_os_volume_stats(f.database_id, f.file_id); 
+		- Stored Procedures
+			sp_SpaceUsed
+			sp_databases
+		- DBCC sqlperf (logspace)
+
+
+Maintaining Instances and Databases
+	TDE - Transparent Data Encryption
+		- Protecting Data in motion [SSL, TLS, IPSec]
+		- Protecting data at rest [EFS, BitLocker, TDE]
+	Provides realtime I/O encryptiona and decryption of the data and log filesin the event thet media is stolen.
+	Protects data at rest in the event that data file, log file or backup is stolen
+	Leverages the SQL server key hierarchy.
+
+	Service Master Key
+	Master Key
+	Certificate
+	Databse Key
+
